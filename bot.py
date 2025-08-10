@@ -2,7 +2,7 @@ import os
 import logging
 import tempfile
 import subprocess
-from telegram import Update
+from telegram import Update, Request
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 import yt_dlp
 
@@ -87,9 +87,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(f"ত্রুটি: {e}")
 
 def main():
+    request = Request(connect_timeout=30, read_timeout=30)
+
     app = ApplicationBuilder()\
         .token(TOKEN)\
-        .request_kwargs({"read_timeout": 30, "connect_timeout": 30})\
+        .request(request)\
         .build()
 
     app.add_handler(CommandHandler("start", start))
