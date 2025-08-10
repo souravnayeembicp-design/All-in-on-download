@@ -1,15 +1,21 @@
 import os
+import logging
 import tempfile
 import subprocess
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 import yt_dlp
 
-# Bot Token environment variable থেকে নেওয়া
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+# Logging চালু
+logging.basicConfig(
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    level=logging.DEBUG
+)
+logger = logging.getLogger(__name__)
 
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 if not TOKEN:
-    raise ValueError("Error: TELEGRAM_BOT_TOKEN environment variable সেট করা হয়নি!")
+    raise ValueError("Set TELEGRAM_BOT_TOKEN environment variable first!")
 
 def remove_tiktok_watermark(input_path, output_path):
     command = [
@@ -77,16 +83,20 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         os.remove(video_path)
     except Exception as e:
+        logger.error(f"Error in handle_message: {e}")
         await update.message.reply_text(f"ত্রুটি: {e}")
 
 def main():
-    app = ApplicationBuilder().token(TOKEN).build()
+    app = ApplicationBuilder()\
+        .token(TOKEN)\
+        .request_kwargs({"read_timeout": 30, "connect_timeout": 30})\
+        .build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(CommandHandler("help", help_command))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
 
-    print("Bot চালু হয়েছে...")
+    logger.info("Bot started...")
     app.run_polling()
 
 if __name__ == "__main__":
