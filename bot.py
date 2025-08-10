@@ -2,7 +2,8 @@ import os
 import logging
 import tempfile
 import subprocess
-from telegram import Update, Request
+from telegram import Update
+from telegram.request import Request
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 import yt_dlp
 
